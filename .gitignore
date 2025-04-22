@@ -172,3 +172,10 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+
+
+data/images/*
+data/captions.json
+data/gallery.db
+coco_temp/*
