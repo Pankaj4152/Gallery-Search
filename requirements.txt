@@ -1,8 +1,12 @@
+# clip
+numpy
+torch
 transformers
-sqlite3
-torch
-streamlit
 requests
-tqdm
-torch
-sentnce-transformers
+torchvision
+flask
+werkzeug
+pillow
+requests
+clip @ git+https://github.com/openai/CLIP.git
+django>=4.0
