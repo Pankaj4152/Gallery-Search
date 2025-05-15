@@ -38,10 +38,9 @@ def upload_image(request):
         storage.save_image(image_obj.path, description, embedding)
 
         messages.success(request, f"Image uploaded and processed: {description}")
-        return redirect('upload_image')
+        return redirect('upload')
 
     return render(request, 'gallery/upload.html')
-
 
 def image_list(request):
     images = Image.objects.all()

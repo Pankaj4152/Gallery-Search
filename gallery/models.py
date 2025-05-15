@@ -3,7 +3,7 @@ import numpy as np
 # Create your models here.
 
 class Image(models.Model):
-    path = models.CharField(max_length=255, unique=True)
+    path = models.CharField(max_length=255)
     image_file = models.FileField(upload_to='images/', null=True, blank=True)  # New field
     description = models.TextField()
     embedding = models.BinaryField()

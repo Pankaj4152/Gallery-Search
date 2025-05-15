@@ -8,8 +8,9 @@
     </style>
 </head>
 <body>
+    {% include 'partials/navbar.html' %}
     <h1>Image Gallery</h1>
-    <a href="{% url 'upload_image' %}">Upload New Image</a>
+    <a href="{% url 'upload' %}">Upload New Image</a>
     {% for image in images %}
         <div class="image">
             <img src="{{ image.image_file.url }}" alt="{{ image.description }}" width="200">

@@ -1,17 +1,9 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Upload Image</title>
-    <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .form-container { margin-bottom: 20px; }
-        .message { padding: 10px; margin: 10px 0; }
-        .success { background-color: #d4edda; color: #155724; }
-        .error { background-color: #f8d7da; color: #721c24; }
-    </style>
-</head>
-<body>
-    <h1>Upload an Image</h1>
+{% extends "base.html" %}
+{% block title %}Upload Image{% endblock %}
+{% load static %}
+
+{% block content %}
+<h1>Upload an Image</h1>
     <div class="form-container">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
@@ -24,5 +16,5 @@
             <div class="message {{ message.tags }}">{{ message }}</div>
         {% endfor %}
     {% endif %}
-</body>
-</html>
+{% endblock %}
+    
