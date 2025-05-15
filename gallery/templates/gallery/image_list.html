@@ -1,24 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Image Gallery{% endblock %}
+
+{% block content %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>Image Gallery</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        .image { margin: 10px 0; }
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .card-img-top {
+            height: 200px;
+            background-color: white; /* Black background */
+            object-fit: contain;     /* Prevents cropping */
+        }
     </style>
 </head>
 <body>
-    {% include 'partials/navbar.html' %}
-    <h1>Image Gallery</h1>
-    <a href="{% url 'upload' %}">Upload New Image</a>
-    {% for image in images %}
-        <div class="image">
-            <img src="{{ image.image_file.url }}" alt="{{ image.description }}" width="200">
-            <p>{{ image.id }}</p>
-            <p>{{ image.description }}</p>
+    <h1 class="mb-4">Image Gallery</h1>
+    <a class="btn btn-primary mb-3" href="{% url 'upload' %}">Upload New Image</a>
+    {% if images %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+        {% for image in images %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div style="background-color: white; height: 200px; display: flex; align-items: center; justify-content: center;">
+                    <img src="{{ image.image_file.url }}" alt="{{ image.description }}"
+                         class="card-img-top"
+                         style="max-height: 100%; max-width: 100%; object-fit: contain;" />
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title text-muted">#{{ image.id }}</h6>
+                    <p class="card-text">{{ image.description }}</p>
+                </div>
+            </div>
         </div>
-    {% empty %}
+        {% endfor %}
+    </div>
+    {% else %}
         <p>No images uploaded yet.</p>
-    {% endfor %}
+    {% endif %}
 </body>
 </html>
+{% endblock %}
