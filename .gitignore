@@ -175,7 +175,4 @@ cython_debug/
 
 
 
-data/images/*
-data/captions.json
-data/gallery.db
-coco_temp/*
+media/images/*
