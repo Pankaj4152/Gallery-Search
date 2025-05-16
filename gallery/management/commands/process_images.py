@@ -24,8 +24,8 @@ class Command(BaseCommand):
         storage.save_image(image_path, description, embedding)
         self.stdout.write(self.style.SUCCESS(f"Saved image: {image_path}, Description: {description}"))
 
-        # Optional: Test similarity search
+        '''# Optional: Test similarity search
         similar_images = storage.search_similarity(embedding, top_k=3)
         self.stdout.write("Top similar images:")
         for result in similar_images:
-            self.stdout.write(f"Path: {result['path']}, Description: {result['description']}, Similarity: {result['similarity']}")
+            self.stdout.write(f"Path: {result['path']}, Description: {result['description']}, Similarity: {result['similarity']}")'''

@@ -55,112 +55,86 @@ def upload_image(request):
 
     return render(request, 'gallery/upload.html')
 
-
-
-    #     file_type = imghdr.what(image_file)
-    #     if file_type not in allowed_types:
-    #         messages.error(request, "Unsupported file type. Please upload a JPEG, PNG, JPG, or WEBP image.")
-    #         return render(request, 'gallery/upload.html')
-
-    #     # Save the image file
-    #     image_obj = Image(image_file=image_file)
-    #     image_obj.save()
-
-    #     # Generate description and embedding
-    #     describer = GenerateImageDescription()
-    #     embedder = GetTextEmbedding()
-    #     image_path = image_obj.image_file.path  # Full path to saved image
-    #     image_obj.path = os.path.relpath(image_path, start=os.path.dirname(image_path))  # Store relative path
-
-    #     description = describer(image_path)
-    #     if description is None:
-    #         messages.error(request, "Failed to generate description.")
-    #         image_obj.delete()  # Clean up if processing fails
-    #         return render(request, 'gallery/upload.html')
-
-    #     embedding = embedder.get_embedding(image_path)
-    #     image_obj.description = description
-    #     image_obj.set_embedding(embedding)
-    #     image_obj.save()
-
-    #     # Save to ImageStorage (optional, for consistency with existing logic)
-    #     storage = ImageStorage()
-    #     storage.save_image(image_obj.path, description, embedding)
-
-    #     messages.success(request, f"Image uploaded and processed: {description}")
-    #     return redirect('upload')
-
-    # return render(request, 'gallery/upload.html')
-
 def image_list(request):
     images = Image.objects.all()
     return render(request, 'gallery/image_list.html', {'images': images})
 
+def cosine_similarity(w, v):
+            """Compute the cosine similarity between two vectors."""
+            return np.dot(w, v) / (np.linalg.norm(w) * np.linalg.norm(v))
 
-
-def cosine_similarity(v, w):
-    return np.dot(v, w) / (np.linalg.norm(v) * np.linalg.norm(w))
-
-
-# Example for HuggingFace CLIP
-from codes.img_to_text import GetTextEmbedding
-
-# def search_images(request):
-#     query = request.GET.get('q', '')
-#     images = []
-#     if query:
-#         embedder = GetTextEmbedding()
-#         text = clip.tokenize([query]).to(embedder.device)
-#         with torch.no_grad():
-#             query_embedding = embedder.model.encode_text(text).cpu().numpy()[0]
-
-#         all_images = Image.objects.all()
-#         results = []
-#         for img in all_images:
-#             img_embedding = img.get_embedding()
-#             sim = cosine_similarity(query_embedding, img_embedding)
-#             results.append((sim, img))
-#         # Sort by similarity (highest first)
-#         results.sort(reverse=True, key=lambda x: x[0])
-#         # Show only the top 5 most similar images
-#         images = [img for sim, img in results[:5] if sim > 0]
-#     return render(request, 'gallery/search.html', {'images': images, 'query': query})
-
-# def search_images(request):
-#     query = request.GET.get('q', '')
-#     images = []
-#     if query:
-#         embedder = GetTextEmbedding()
-#         text = clip.tokenize([query]).to(embedder.device)
-#         with torch.no_grad():
-#             query_embedding = embedder.model.encode_text(text).cpu().numpy()[0]
-
-#         all_images = Image.objects.all()
-#         results = []
-#         for img in all_images:
-#             img_embedding = img.get_embedding()
-#             sim = cosine_similarity(query_embedding, img_embedding)
-#             if sim >= 0.1:  # 👈 change threshold here (e.g. 0.25 for 25% similarity)
-#                 results.append((sim, img))
-
-#         results.sort(reverse=True, key=lambda x: x[0])
-#         images = [img for sim, img in results]
-#     return render(request, 'gallery/search.html', {'images': images, 'query': query})
-def search_images(request):
+'''def search_images(request):
     query = request.GET.get('q', '')
     results = []
+
     if query:
         embedder = GetTextEmbedding()
         text = clip.tokenize([query]).to(embedder.device)
         with torch.no_grad():
             query_embedding = embedder.model.encode_text(text).cpu().numpy()[0]
+            query_embedding = query_embedding / np.linalg.norm(query_embedding)  # embedding norm
 
-        all_images = Image.objects.all()
-        for img in all_images:
-            img_embedding = img.get_embedding()
-            sim = cosine_similarity(query_embedding, img_embedding)
-            if sim >= 0.1:
-                results.append({'image': img, 'similarity': sim})
+        for img in Image.objects.all().iterator():
+            stored_embedding = img.get_embedding()
 
+            if stored_embedding is not None:
+                norm_s_embedding = stored_embedding / np.linalg.norm(stored_embedding)
+                similarity = cosine_similarity(query_embedding, norm_s_embedding)
+
+                # Check description matches query
+                description_words = img.description.lower().split()
+                query_words = query.split()
+                description_match = any(word in description_words for word in query_words)
+
+            if similarity > 0.3 or description_match:
+                results.append({'image': img, 'similarity': similarity, 'match': 'embedding' if similarity > 0.3 else 'description'})
+
+        results.sort(key=lambda x: (x['similarity'], x.get('match_type') == 'description'),reverse=True)
+    return render(request, 'gallery/search.html', {'results': results, 'query': query, 'results_count': len(results)})'''
+
+def search_images(request):
+    query = request.GET.get('q', '').strip().lower()
+    results = []
+
+    if query:
+        # 1. Obtener embedding del query (normalizado)
+        embedder = GetTextEmbedding()
+        text_input = clip.tokenize([query], truncate=True).to(embedder.device)
+        
+        with torch.no_grad():
+            query_embedding = embedder.model.encode_text(text_input)
+            query_embedding = query_embedding.cpu().numpy()[0].astype('float32')
+            query_embedding = query_embedding / np.linalg.norm(query_embedding)
+
+        # 2. Búsqueda en imágenes
+        for img in Image.objects.all().iterator():
+            stored_embedding = img.get_embedding()
+            
+            if stored_embedding is not None:
+                # Asegurar que el stored_embedding esté normalizado
+                stored_embedding = stored_embedding / np.linalg.norm(stored_embedding)
+                
+                # Calcular similitud coseno (ya están normalizados)
+                similarity = np.dot(query_embedding, stored_embedding)
+                
+                # Verificar match en descripción (case-insensitive)
+                description_words = set(img.description.lower().split())
+                query_words = set(query.split())
+                description_match = not query_words.isdisjoint(description_words)
+                
+                # Filtro combinado
+                if similarity > 0.3 or description_match:
+                    results.append({
+                        'image': img,
+                        'similarity': float(similarity),  # Convertir a float nativo
+                        'match_type': 'embedding' if similarity > 0.5 else 'description'
+                    })
+
+        # Ordenar por similitud descendente
         results.sort(key=lambda x: x['similarity'], reverse=True)
-    return render(request, 'gallery/search.html', {'results': results, 'query': query})
+    
+    return render(request, 'gallery/search.html', {
+        'results': results[:100],  # Limitar resultados
+        'query': query,
+        'results_count': len(results)
+    })

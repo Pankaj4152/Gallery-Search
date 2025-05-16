@@ -54,7 +54,7 @@ class GenerateImageDescription:
         return self.img_to_text(img_source, **kwargs)
 
 class GetTextEmbedding:
-    def __init__(self, model_name=("ViT-B/16"), device='cuda' if torch.cuda.is_available() else 'cpu'):
+    def __init__(self, model_name=("ViT-B/16"), device='cpu'):
         self.device = device
         self.model, self.preprocess = clip.load(model_name, device=device)
 
