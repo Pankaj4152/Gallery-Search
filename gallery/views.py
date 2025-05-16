@@ -138,3 +138,24 @@ def search_images(request):
         'query': query,
         'results_count': len(results)
     })
+
+from django.views.decorators.http import require_POST
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+
+@require_POST
+def delete_image(request, image_id):
+    try:
+        image = Image.objects.get(id=image_id)
+        image.image_file.delete(save=False)  # Delete the file from storage
+        image.delete()
+        messages.success(request, "Image deleted successfully.")
+    except Image.DoesNotExist:
+        messages.error(request, "Image not found.")
+    return HttpResponseRedirect(reverse('image_list'))
+
+@require_POST
+def delete_all_images(request):
+    Image.objects.all().delete()
+    messages.success(request, "All images deleted successfully.")
+    return HttpResponseRedirect(reverse('image_list'))

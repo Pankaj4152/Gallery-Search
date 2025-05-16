@@ -3,8 +3,14 @@
 {% load static %}
 
 {% block content %}
-    <h1>Welcome to Gallery Search AI</h1>
-    <form action="{% url 'upload' %}">
-        <button type="submit">Upload image</button>
-    </form>
+<div class="container mt-4">
+    <div class="card shadow-sm p-5 text-center">
+        <h1 class="mb-4">Welcome to GalleryAI</h1>
+        <p class="lead">Upload, search, and explore your AI-powered image gallery.</p>
+        <div class="mt-3">
+            <a href="{% url 'upload' %}" class="btn btn-primary me-2">Upload Image</a>
+            <a href="{% url 'search_images' %}" class="btn btn-outline-primary">Search Images</a>
+        </div>
+    </div>
+</div>
 {% endblock %}
