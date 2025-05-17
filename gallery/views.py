@@ -10,14 +10,16 @@ import numpy as np
 from django.db.models import Q
 import torch
 import clip
+from django.contrib.auth.decorators import login_required
 
 MAX_FILE_SIZE_MB = 5  # Maximum size per image in MB
 MAX_TOTAL_STORAGE_MB = 10  # Maximum total storage in MB
 
-def get_total_storage_used():
-    # Calculate the total storage used by all images in the database (in bytes)
-    return sum(img.image_file.size for img in Image.objects.all() if img.image_file and img.image_file.size)
 
+def get_total_storage_used(user):
+    return sum(img.image_file.size for img in Image.objects.filter(user=user) if img.image_file and img.image_file.size)
+
+@login_required
 def upload_image(request):
     # Handle image upload via POST request
     if request.method == 'POST':
@@ -28,7 +30,7 @@ def upload_image(request):
 
         allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']          # Supported MIME types
         success_count = 0                                                               # Track number of successful uploads
-        total_storage = get_total_storage_used()                                        # Current storage usage
+        total_storage = get_total_storage_used(request.user)                            # Current storage usage
 
         for image_file in image_files:
             # Check if the file exceeds the per-file size limit
@@ -48,7 +50,7 @@ def upload_image(request):
                 continue
 
             # Save the image to the database and filesystem
-            image_obj = Image(image_file=image_file, path=image_file.name)
+            image_obj = Image(image_file=image_file, path=image_file.name, user=request.user)
             image_obj.save()
 
             # Initialize description and embedding generators
@@ -83,10 +85,11 @@ def upload_image(request):
     # Render upload page for GET requests
     return render(request, 'gallery/upload.html')
 
+@login_required
 def image_list(request):
     # Display all images and storage usage statistics
-    images = Image.objects.all()
-    total_storage = get_total_storage_used()  # in bytes
+    images = Image.objects.filter(user=request.user)
+    total_storage = get_total_storage_used(request.user)  # in bytes
     max_storage = MAX_TOTAL_STORAGE_MB * 1024 * 1024  # in bytes
     percent_used = int((total_storage / max_storage) * 100) if max_storage else 0
     return render(request, 'gallery/image_list.html', {
@@ -100,6 +103,7 @@ def cosine_similarity(w, v):
     """Compute the cosine similarity between two vectors."""
     return np.dot(w, v) / (np.linalg.norm(w) * np.linalg.norm(v))
 
+@login_required
 def search_images(request):
     # Handle image search by text query
     query = request.GET.get('q', '').strip().lower()
@@ -118,7 +122,7 @@ def search_images(request):
         # 2. Search in images using embedding similarity and description match
         SIMILARITY_THRESHOLD = 0.5  # Set your desired threshold
 
-        for img in Image.objects.all().iterator():
+        for img in Image.objects.filter(user=request.user).iterator():
             stored_embedding = img.get_embedding()
             if stored_embedding is not None:
                 # Validate embedding shape and values
@@ -156,11 +160,12 @@ def search_images(request):
         'results_count': len(results)
     })
 
-@require_POST
+@login_required
+@require_POST 
 def delete_image(request, image_id):
     # Delete a single image by ID
     try:
-        image = Image.objects.get(id=image_id)
+        image = Image.objects.get(id=image_id, user=request.user)
         image.image_file.delete(save=False)  # Delete the file from storage
         image.delete()
         messages.success(request, "Image deleted successfully.")
@@ -168,9 +173,10 @@ def delete_image(request, image_id):
         messages.error(request, "Image not found.")
     return HttpResponseRedirect(reverse('image_list'))
 
+@login_required
 @require_POST
 def delete_all_images(request):
     # Delete all images from the gallery
-    Image.objects.all().delete()
+    Image.objects.filter(user=request.user).delete()
     messages.success(request, "All images deleted successfully.")
     return HttpResponseRedirect(reverse('image_list'))

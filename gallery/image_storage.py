@@ -2,11 +2,8 @@ import numpy as np
 from .models import Image
 
 class ImageStorage:
-    def save_image(self, path, description, embedding):
-        """
-        Save an image with its path, description, and embedding to the database.
-        """
-        image = Image(path=path, description=description)
+    def save_image(self, user, image_file, description, embedding):
+        image = Image(user=user, image_file=image_file, description=description)
         image.set_embedding(embedding)
         image.save()
 
