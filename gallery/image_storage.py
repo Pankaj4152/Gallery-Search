@@ -7,6 +7,7 @@ class ImageStorage:
         Save an image with its path, description, and embedding to the database.
         """
         image = Image(path=path, description=description)
+        embedding = embedding / np.linalg.norm(embedding)
         image.set_embedding(embedding)
         image.save()
 

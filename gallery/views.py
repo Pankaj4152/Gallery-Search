@@ -1,13 +1,18 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.http import JsonResponse
 from codes.img_to_text import GenerateImageDescription, GetTextEmbedding
 from .image_storage import ImageStorage
 from .models import Image
+from .tasks import process_image_task
 import numpy as np
 from django.db.models import Q
 import torch
 import clip
 
+@ csrf_exempt
 def upload_image(request):
     if request.method == 'POST':
         image_files = request.FILES.getlist('image')
@@ -18,6 +23,7 @@ def upload_image(request):
         # File type restriction
         allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
         success_count = 0
+        img_ids = []
         for image_file in image_files:
             file_type = image_file.content_type  # Get the file type from content type
             if file_type not in allowed_types:
@@ -26,32 +32,29 @@ def upload_image(request):
 
             # Save the image file
             image_obj = Image(image_file=image_file, path=image_file.name)
+            img_ids.append(image_obj.id)
+            process_image_task.delay(image_obj.id)
             image_obj.save()
 
-            # Generate description and embedding
-            describer = GenerateImageDescription()
-            embedder = GetTextEmbedding()
-            image_path = image_obj.image_file.path  # Full path to saved image
-
-            description = describer(image_path)
+            '''
             if description is None:
                 messages.error(request, f"Failed to generate description for {image_file.name}.")
                 image_obj.delete()
                 continue
-
-            embedding = embedder.get_embedding(image_path)
-            image_obj.description = description
-            image_obj.set_embedding(embedding)
-            image_obj.save()
-
+            '''
             success_count += 1
 
-        if success_count:
+        return JsonResponse({
+            'message': f"{len(image_files)} received. Processing on background.",
+            'img_ids': img_ids,
+        })
+
+        '''if success_count:
             messages.success(request, f"{success_count} image(s) uploaded and processed successfully.")
         else:
-            messages.error(request, "No images were successfully processed.")
+            messages.error(request, "No images were successfully processed.")'''
 
-        return redirect('upload')
+        '''return redirect('upload')'''
 
     return render(request, 'gallery/upload.html')
 
@@ -61,7 +64,9 @@ def image_list(request):
 
 def cosine_similarity(w, v):
             """Compute the cosine similarity between two vectors."""
-            return np.dot(w, v) / (np.linalg.norm(w) * np.linalg.norm(v))
+            w /= np.linalg.norm(w)
+            v /= np.linalg.norm(v)
+            return np.dot(w, v)
 
 '''def search_images(request):
     query = request.GET.get('q', '')
@@ -97,36 +102,33 @@ def search_images(request):
     results = []
 
     if query:
-        # 1. Obtener embedding del query (normalizado)
+
         embedder = GetTextEmbedding()
         text_input = clip.tokenize([query], truncate=True).to(embedder.device)
         
         with torch.no_grad():
             query_embedding = embedder.model.encode_text(text_input)
             query_embedding = query_embedding.cpu().numpy()[0].astype('float32')
-            query_embedding = query_embedding / np.linalg.norm(query_embedding)
 
-        # 2. Búsqueda en imágenes
         for img in Image.objects.all().iterator():
             stored_embedding = img.get_embedding()
             
             if stored_embedding is not None:
-                # Asegurar que el stored_embedding esté normalizado
-                stored_embedding = stored_embedding / np.linalg.norm(stored_embedding)
                 
-                # Calcular similitud coseno (ya están normalizados)
-                similarity = np.dot(query_embedding, stored_embedding)
+                stored_embedding = stored_embedding.astype('float32')
+                stored_embedding = stored_embedding.reshape(-1)
+
+                similarity = cosine_similarity(query_embedding, stored_embedding)
+                similarity = float(similarity)
                 
-                # Verificar match en descripción (case-insensitive)
                 description_words = set(img.description.lower().split())
                 query_words = set(query.split())
                 description_match = not query_words.isdisjoint(description_words)
                 
-                # Filtro combinado
                 if similarity > 0.3 or description_match:
                     results.append({
                         'image': img,
-                        'similarity': float(similarity),  # Convertir a float nativo
+                        'similarity': similarity,
                         'match_type': 'embedding' if similarity > 0.5 else 'description'
                     })
 

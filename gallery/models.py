@@ -1,21 +1,21 @@
 from django.db import models
-import numpy as np
+import pickle
 # Create your models here.
 
 class Image(models.Model):
     path = models.CharField(max_length=255)
     image_file = models.FileField(upload_to='images/', null=True, blank=True)  # New field
-    description = models.TextField()
-    embedding = models.BinaryField()
+    description = models.TextField(blank=True)
+    embedding = models.BinaryField(blank=True) 
     similarity = models.FloatField(null=True, blank=True)
 
     def set_embedding(self, embedding):
         # Convert the numpy array to binary(bytes) for storage
-        self.embedding = embedding.tobytes()
+        self.embedding = pickle.dumps(embedding)
     
     def get_embedding(self):
         # Convert the binary data back to a numpy array
-        return np.frombuffer(self.embedding, dtype=np.float32)
+        return pickle.loads(self.embedding)
 
     def __str__(self):
         return f"Image: {self.path}"
