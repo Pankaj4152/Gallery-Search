@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   redis:
-    image: redis:alpine
+    image: redis:7
     ports:
       - "6379:6379"
 
@@ -13,14 +13,19 @@ services:
       - media:/app/media
     ports:
       - "8000:8000"
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
     depends_on:
       - redis
+      - worker
     command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
 
   worker:
     build: .
     volumes:
       - .:/app
+      - ~/.cache/huggingface:/root/.cache/huggingface
+      - ~/.cache/clip:/root/.cache/clip
     depends_on:
       - redis
     command: celery -A GallerySearch worker --loglevel=info

@@ -44,10 +44,10 @@ def upload_image(request):
             '''
             success_count += 1
 
-        return JsonResponse({
+        '''return JsonResponse({
             'message': f"{len(image_files)} received. Processing on background.",
             'img_ids': img_ids,
-        })
+        })'''
 
         '''if success_count:
             messages.success(request, f"{success_count} image(s) uploaded and processed successfully.")
@@ -62,11 +62,21 @@ def image_list(request):
     images = Image.objects.all()
     return render(request, 'gallery/image_list.html', {'images': images})
 
-def cosine_similarity(w, v):
-            """Compute the cosine similarity between two vectors."""
-            w /= np.linalg.norm(w)
-            v /= np.linalg.norm(v)
-            return np.dot(w, v)
+def cosine_similarity(A, B):
+    """Compute the cosine similarity between two vectors or matrices."""
+    cos = -10    
+    dot = np.dot(A, B)
+    normb = np.linalg.norm(B)
+    
+    if len(A.shape) == 1:
+        norma = np.linalg.norm(A)
+        cos = dot / (norma * normb)
+    else: # If A is a matrix, compute the norms of the word vectors of the matrix (norm of each row)
+        norma = np.linalg.norm(A, axis=1)
+        epsilon = 1.0e-9 
+        cos = dot / (norma * normb + epsilon)
+        
+    return cos
 
 '''def search_images(request):
     query = request.GET.get('q', '')
