@@ -18,14 +18,17 @@ services:
     depends_on:
       - redis
       - worker
-    command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
 
   worker:
     build: .
     volumes:
       - .:/app
+      - media:/app/media
       - ~/.cache/huggingface:/root/.cache/huggingface
       - ~/.cache/clip:/root/.cache/clip
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
     depends_on:
       - redis
     command: celery -A GallerySearch worker --loglevel=info

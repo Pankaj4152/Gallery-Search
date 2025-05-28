@@ -1,10 +1,17 @@
-FROM python:3.13-slim
+FROM python:3.10-slim
 
-WORKDIR /app  # TODO: Define path
+WORKDIR /app
 
 COPY requirements.txt .
 RUN apt-get update && apt-get install -y \
     git \
+    build-essential \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libjpeg-dev \
+    zlib1g-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 

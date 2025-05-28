@@ -6,7 +6,7 @@ from django.http import JsonResponse
 from codes.img_to_text import GenerateImageDescription, GetTextEmbedding
 from .image_storage import ImageStorage
 from .models import Image
-from .tasks import process_image_task
+from .tasks import *
 import numpy as np
 from django.db.models import Q
 import torch
@@ -20,10 +20,9 @@ def upload_image(request):
             messages.error(request, "No image files provided.")
             return render(request, 'gallery/upload.html')
 
-        # File type restriction
         allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
         success_count = 0
-        img_ids = []
+        
         for image_file in image_files:
             file_type = image_file.content_type  # Get the file type from content type
             if file_type not in allowed_types:
@@ -32,29 +31,17 @@ def upload_image(request):
 
             # Save the image file
             image_obj = Image(image_file=image_file, path=image_file.name)
-            img_ids.append(image_obj.id)
-            process_image_task.delay(image_obj.id)
             image_obj.save()
-
-            '''
-            if description is None:
-                messages.error(request, f"Failed to generate description for {image_file.name}.")
-                image_obj.delete()
-                continue
-            '''
+    
+            process_image_task.delay(image_obj.id)
             success_count += 1
 
-        '''return JsonResponse({
-            'message': f"{len(image_files)} received. Processing on background.",
-            'img_ids': img_ids,
-        })'''
-
-        '''if success_count:
-            messages.success(request, f"{success_count} image(s) uploaded and processed successfully.")
+        if success_count > 0:
+            messages.success(request, f'{success_count} image(s) uploaded. Description will be generated shrortly.')
         else:
-            messages.error(request, "No images were successfully processed.")'''
+            messages.error(request, "No valid images were uploaded. Please upload JPEG, PNG, JPG, or WEBP images.")
 
-        '''return redirect('upload')'''
+        return redirect('upload')
 
     return render(request, 'gallery/upload.html')
 
