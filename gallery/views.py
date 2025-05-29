@@ -1,16 +1,16 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from django.http import JsonResponse
-from codes.img_to_text import GenerateImageDescription, GetTextEmbedding
-from .image_storage import ImageStorage
+from codes.img_to_text import GetTextEmbedding
 from .models import Image
 from .tasks import *
 import numpy as np
-from django.db.models import Q
 import torch
 import clip
+from django.views.decorators.http import require_POST
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from codes.faiss_index import FaissSearchEngine
 
 @ csrf_exempt
 def upload_image(request):
@@ -65,36 +65,24 @@ def cosine_similarity(A, B):
         
     return cos
 
-'''def search_images(request):
-    query = request.GET.get('q', '')
+def search_images(request):  # TODO: TEST this function !!
+    query = request.GET.get("query", "").strip().lower()
     results = []
 
+    embedder = GetTextEmbedding()
+
     if query:
-        embedder = GetTextEmbedding()
-        text = clip.tokenize([query]).to(embedder.device)
-        with torch.no_grad():
-            query_embedding = embedder.model.encode_text(text).cpu().numpy()[0]
-            query_embedding = query_embedding / np.linalg.norm(query_embedding)  # embedding norm
+        query_embedding = embedder.get_embedding(query)
+        engine = FaissSearchEngine()
+        matches = engine.search(query_embedding, top_k=5)
 
-        for img in Image.objects.all().iterator():
-            stored_embedding = img.get_embedding()
+        results = Image.objects.filter(id__in=[m["id"] for m in matches])
+        # puedes ordenar por distancia si deseas
+        results = sorted(results, key=lambda x: [m["distance"] for m in matches if m["id"] == x.id][0])
 
-            if stored_embedding is not None:
-                norm_s_embedding = stored_embedding / np.linalg.norm(stored_embedding)
-                similarity = cosine_similarity(query_embedding, norm_s_embedding)
+    return render(request, "gallery/search_results.html", {"results": results, "query": query})
 
-                # Check description matches query
-                description_words = img.description.lower().split()
-                query_words = query.split()
-                description_match = any(word in description_words for word in query_words)
-
-            if similarity > 0.3 or description_match:
-                results.append({'image': img, 'similarity': similarity, 'match': 'embedding' if similarity > 0.3 else 'description'})
-
-        results.sort(key=lambda x: (x['similarity'], x.get('match_type') == 'description'),reverse=True)
-    return render(request, 'gallery/search.html', {'results': results, 'query': query, 'results_count': len(results)})'''
-
-def search_images(request):
+'''def search_images(request):
     query = request.GET.get('q', '').strip().lower()
     results = []
 
@@ -136,11 +124,7 @@ def search_images(request):
         'results': results[:100],  # Limitar resultados
         'query': query,
         'results_count': len(results)
-    })
-
-from django.views.decorators.http import require_POST
-from django.http import HttpResponseRedirect
-from django.urls import reverse
+    })'''
 
 @require_POST
 def delete_image(request, image_id):
