@@ -66,21 +66,21 @@ def cosine_similarity(A, B):
     return cos
 
 def search_images(request):  # TODO: TEST this function !!
-    query = request.GET.get("query", "").strip().lower()
+    query = request.GET.get("q", "").strip().lower()
     results = []
 
-    embedder = GetTextEmbedding()
-
     if query:
+        embedder = GetTextEmbedding()
+        
         query_embedding = embedder.get_embedding(query)
         engine = FaissSearchEngine()
         matches = engine.search(query_embedding, top_k=5)
 
         results = Image.objects.filter(id__in=[m["id"] for m in matches])
-        # puedes ordenar por distancia si deseas
+        
         results = sorted(results, key=lambda x: [m["distance"] for m in matches if m["id"] == x.id][0])
 
-    return render(request, "gallery/search_results.html", {"results": results, "query": query})
+    return render(request, "gallery/search.html", {"results": results, "query": query})
 
 '''def search_images(request):
     query = request.GET.get('q', '').strip().lower()
@@ -89,7 +89,7 @@ def search_images(request):  # TODO: TEST this function !!
     if query:
 
         embedder = GetTextEmbedding()
-        text_input = clip.tokenize([query], truncate=True).to(embedder.device)
+        text_input = clip.tokenize([query], truncate=False).to(embedder.device)
         
         with torch.no_grad():
             query_embedding = embedder.model.encode_text(text_input)

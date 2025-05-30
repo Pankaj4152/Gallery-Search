@@ -1,9 +1,7 @@
 import clip
-import sqlite3
 import torch
 import logging
 import requests
-import numpy as np
 from PIL import Image
 from io import BytesIO
 from typing import Union
