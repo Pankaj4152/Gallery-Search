@@ -68,9 +68,11 @@ TEMPLATES = [
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
+                "django.template.context_processors.debug",
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.media",
             ],
         },
     },
@@ -136,32 +138,13 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, "core/static"),]
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-
-
-
-
-
-
-
-
 # Media settings for uploaded files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# Template settings
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.media',  # Add for media files
-            ],
-        },
-    },
-]
+LOGOUT_REDIRECT_URL = '/'
+
+LOGIN_REDIRECT_URL = '/gallery/image_list/'
+
+# SESSION_ENGINE = "django.contrib.sessions.backends.file"
+# SESSION_FILE_PATH = "/tmp/django_sessions"  # or another temp directory
