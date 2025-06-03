@@ -10,7 +10,7 @@ import clip
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from codes.faiss_index import FaissSearchEngine
+from codes.faiss_index import FaissSearchEngine, FaissIndexController
 
 @ csrf_exempt
 def upload_image(request):
@@ -80,51 +80,10 @@ def search_images(request):  # TODO: TEST this function !!
         
         results = sorted(results, key=lambda x: [m["distance"] for m in matches if m["id"] == x.id][0])
 
+        if len(matches) == 0:
+            return messages.error(request, "No matches found.")
+
     return render(request, "gallery/search.html", {"results": results, "query": query})
-
-'''def search_images(request):
-    query = request.GET.get('q', '').strip().lower()
-    results = []
-
-    if query:
-
-        embedder = GetTextEmbedding()
-        text_input = clip.tokenize([query], truncate=False).to(embedder.device)
-        
-        with torch.no_grad():
-            query_embedding = embedder.model.encode_text(text_input)
-            query_embedding = query_embedding.cpu().numpy()[0].astype('float32')
-
-        for img in Image.objects.all().iterator():
-            stored_embedding = img.get_embedding()
-            
-            if stored_embedding is not None:
-                
-                stored_embedding = stored_embedding.astype('float32')
-                stored_embedding = stored_embedding.reshape(-1)
-
-                similarity = cosine_similarity(query_embedding, stored_embedding)
-                similarity = float(similarity)
-                
-                description_words = set(img.description.lower().split())
-                query_words = set(query.split())
-                description_match = not query_words.isdisjoint(description_words)
-                
-                if similarity > 0.3 or description_match:
-                    results.append({
-                        'image': img,
-                        'similarity': similarity,
-                        'match_type': 'embedding' if similarity > 0.5 else 'description'
-                    })
-
-        # Ordenar por similitud descendente
-        results.sort(key=lambda x: x['similarity'], reverse=True)
-    
-    return render(request, 'gallery/search.html', {
-        'results': results[:100],  # Limitar resultados
-        'query': query,
-        'results_count': len(results)
-    })'''
 
 @require_POST
 def delete_image(request, image_id):
@@ -132,6 +91,10 @@ def delete_image(request, image_id):
         image = Image.objects.get(id=image_id)
         image.image_file.delete(save=False)  # Delete the file from storage
         image.delete()
+
+        delete_from_idx = FaissIndexController()
+        delete_from_idx.remove_img_from_idx(image_id)
+
         messages.success(request, "Image deleted successfully.")
     except Image.DoesNotExist:
         messages.error(request, "Image not found.")

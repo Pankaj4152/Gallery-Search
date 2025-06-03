@@ -9,7 +9,7 @@ class EmbeddingExtractor:
 
     def get_embedding(self):
         ''' Extract embeddings for image description'''
-        for img in Image.objects.exlude(desctription=None):
+        for img in Image.objects.exclude(desctription=None):
             if not img.embedding:
                 embedding = self.model.encode(img.description, device=self.device)
                 img.embedding = pickle.dumps(embedding)

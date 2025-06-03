@@ -1,4 +1,6 @@
-from codes.img_to_text import GenerateImageDescription, GetTextEmbedding
+from codes.img_to_text import GenerateImageDescription
+from codes.embedding_extraction import EmbeddingExtractor
+from codes.faiss_index import FaissIndexController
 from .models import Image
 from celery import shared_task
 import os
@@ -9,12 +11,14 @@ def process_image_task(self, image_id):
         image_obj = Image.objects.get(id=image_id)
         img_path = image_obj.image_file.path
 
-        # Generate description and embedding
+        # Generate description, embedding and add it to faiss index
         describer = GenerateImageDescription()
-        embedder = GetTextEmbedding()
+        embedder = EmbeddingExtractor()
+        indexer = FaissIndexController()
 
         description = describer.img_to_text(img_path)
-        embedding = embedder.get_embedding(img_path)
+        embedding = embedder.get_embedding()
+        indexer.add_img_to_idx(image_obj)
 
         image_obj.description = description
         image_obj.set_embedding(embedding)
