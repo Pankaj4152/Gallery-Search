@@ -1,8 +1,14 @@
 from django.db import models
+from django.contrib.auth.models import User
+import numpy as np
 import pickle
-# Create your models here.
+
+def user_directory_path(instance, filename):
+    # file will be uploaded to MEDIA_ROOT/images/user_<id>/<filename>
+    return f'images/user_{instance.user.id}/{filename}'
 
 class Image(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='images')
     path = models.CharField(max_length=255)
     image_file = models.FileField(upload_to='images/', null=True, blank=True) 
     description = models.TextField(blank=True)

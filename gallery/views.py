@@ -1,37 +1,61 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.views.decorators.csrf import csrf_exempt
-from codes.img_to_text import GetTextEmbedding
+from django.views.decorators.http import require_POST
+from django.http import HttpResponseRedirect
+from django.urls import reverse
+from codes.img_to_text import GenerateImageDescription, GetTextEmbedding
 from codes.embedding_extraction import EmbeddingExtractor
+from .image_storage import ImageStorage
 from .models import Image
 from .tasks import *
-import numpy as np
-import torch
-import clip
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from codes.faiss_index import FaissSearchEngine, FaissIndexController
+import numpy as np
+import torch
+import clip
+from django.contrib.auth.decorators import login_required
 
-@ csrf_exempt
+MAX_FILE_SIZE_MB = 5  # Maximum size per image in MB
+MAX_TOTAL_STORAGE_MB = 10  # Maximum total storage in MB
+
+
+def get_total_storage_used(user):
+    return sum(img.image_file.size for img in Image.objects.filter(user=user) if img.image_file and img.image_file.size)
+
+@login_required
 def upload_image(request):
+    # Handle image upload via POST request
     if request.method == 'POST':
-        image_files = request.FILES.getlist('image')
+        image_files = request.FILES.getlist('image')  # Get list of uploaded files
         if not image_files:
             messages.error(request, "No image files provided.")
             return render(request, 'gallery/upload.html')
 
-        allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
-        success_count = 0
-        
+        allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']          # Supported MIME types
+        success_count = 0                                                               # Track number of successful uploads
+        total_storage = get_total_storage_used(request.user)                            # Current storage usage
+
         for image_file in image_files:
-            file_type = image_file.content_type  # Get the file type from content type
+            # Check if the file exceeds the per-file size limit
+            if image_file.size > MAX_FILE_SIZE_MB * 1024 * 1024:
+                messages.warning(request, f"{image_file.name} is too large (>{MAX_FILE_SIZE_MB}MB).")
+                continue
+
+            # Check if adding this file would exceed the total storage limit
+            if total_storage + image_file.size > MAX_TOTAL_STORAGE_MB * 1024 * 1024:
+                messages.error(request, f"Cannot upload {image_file.name}: total gallery storage limit ({MAX_TOTAL_STORAGE_MB}MB) reached.")
+                break  # Stop processing further files
+
+            file_type = image_file.content_type
+            # Check if the file type is allowed
             if file_type not in allowed_types:
                 messages.warning(request, f"Unsupported file type for {image_file.name}. Please upload a JPEG, PNG, JPG, or WEBP image.")
                 continue
 
-            # Save the image file
-            image_obj = Image(image_file=image_file, path=image_file.name)
+            # Save the image to the database and filesystem
+            image_obj = Image(image_file=image_file, path=image_file.name, user=request.user)
             image_obj.save()
     
             process_image_task.delay(image_obj.id)
@@ -44,11 +68,22 @@ def upload_image(request):
 
         return redirect('upload')
 
+    # Render upload page for GET requests
     return render(request, 'gallery/upload.html')
 
+@login_required
 def image_list(request):
-    images = Image.objects.all()
-    return render(request, 'gallery/image_list.html', {'images': images})
+    # Display all images and storage usage statistics
+    images = Image.objects.filter(user=request.user)
+    total_storage = get_total_storage_used(request.user)  # in bytes
+    max_storage = MAX_TOTAL_STORAGE_MB * 1024 * 1024  # in bytes
+    percent_used = int((total_storage / max_storage) * 100) if max_storage else 0
+    return render(request, 'gallery/image_list.html', {
+        'images': images,
+        'total_storage': total_storage,
+        'max_storage': max_storage,
+        'percent_used': percent_used,
+    })
 
 def cosine_similarity(A, B):
     """Compute the cosine similarity between two vectors or matrices."""
@@ -66,8 +101,10 @@ def cosine_similarity(A, B):
         
     return cos
 
-def search_images(request): 
-    query = request.GET.get("q", "").strip().lower()
+@login_required
+def search_images(request):
+    # Handle image search by text query
+    query = request.GET.get('q', '').strip().lower()
     results = []
 
     if query:
@@ -87,8 +124,9 @@ def search_images(request):
 
 @require_POST
 def delete_image(request, image_id):
+    # Delete a single image by ID
     try:
-        image = Image.objects.get(id=image_id)
+        image = Image.objects.get(id=image_id, user=request.user)
         image.image_file.delete(save=False)  # Delete the file from storage
         image.delete()
 
@@ -100,8 +138,10 @@ def delete_image(request, image_id):
         messages.error(request, "Image not found.")
     return HttpResponseRedirect(reverse('image_list'))
 
+@login_required
 @require_POST
 def delete_all_images(request):
-    Image.objects.all().delete()
+    # Delete all images from the gallery
+    Image.objects.filter(user=request.user).delete()
     messages.success(request, "All images deleted successfully.")
     return HttpResponseRedirect(reverse('image_list'))
