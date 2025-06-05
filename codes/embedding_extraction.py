@@ -3,7 +3,7 @@ from gallery.models import Image
 import pickle
 
 class EmbeddingExtractor:
-    def __init__(self, model='all-MiniLM-L6-v2', device='cpu'):
+    def __init__(self, model='sentence-transformers/multi-qa-mpnet-base-dot-v1', device='cpu'):
         self.model = SentenceTransformer(model)
         self.device = device
 

@@ -1,6 +1,6 @@
 FROM python:3.10 AS model-downloader
 RUN pip install --no-cache-dir sentence-transformers
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/tmp/models')"
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('sentence-transformers/multi-qa-mpnet-base-dot-v1', cache_folder='/tmp/models')"
 
 FROM python:3.10-slim
 

@@ -18,7 +18,7 @@ class FaissSearchEngine:
                 vector = pickle.loads(img.embedding)
                 vector = np.array(vector, dtype='float32')
 
-                if vector.shape != (384,):
+                if vector.shape != (768,):
                     print(f'WARNING Invalid vector shape for image description {img.id}: {vector.shape}')
                     continue
 
@@ -95,7 +95,7 @@ class FaissIndexController(FaissSearchEngine):
         try:
             v = pickle.loads(img.embedding)
             v = np.array(v).astype('float32').reshape(1, -1)
-            faiss.normalize_L2(v)
+        
             self.index.add_with_ids(v, np.array([img.id], dtype='int64'))
             self.save_index()
             return(f"INFO Image ID {img.id} saved to index")

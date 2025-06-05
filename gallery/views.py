@@ -71,14 +71,11 @@ def search_images(request):
     results = []
 
     if query:
-        if len(query.split()) <= 3:
-            query = f'An image of {query}'
-
         embedder = EmbeddingExtractor()
         
         query_embedding = embedder.get_embedding(query)
         engine = FaissSearchEngine()
-        matches = engine.search(query_embedding, k=50, threshold=0.30)
+        matches = engine.search(query_embedding, k=50, threshold=0.40)
 
         if matches:
             imgs = Image.objects.filter(id__in=[m["id"] for m in matches])
