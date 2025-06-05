@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from codes.img_to_text import GetTextEmbedding
+from codes.embedding_extraction import EmbeddingExtractor
 from .models import Image
 from .tasks import *
 import numpy as np
@@ -65,23 +66,25 @@ def cosine_similarity(A, B):
         
     return cos
 
-def search_images(request):  # TODO: TEST this function !!
+def search_images(request): 
     query = request.GET.get("q", "").strip().lower()
     results = []
 
     if query:
-        embedder = GetTextEmbedding()
+        if len(query.split()) <= 3:
+            query = f'An image of {query}'
+
+        embedder = EmbeddingExtractor()
         
         query_embedding = embedder.get_embedding(query)
         engine = FaissSearchEngine()
-        matches = engine.search(query_embedding, top_k=5)
+        matches = engine.search(query_embedding, k=50, threshold=0.30)
 
-        results = Image.objects.filter(id__in=[m["id"] for m in matches])
-        
-        results = sorted(results, key=lambda x: [m["distance"] for m in matches if m["id"] == x.id][0])
-
-        if len(matches) == 0:
-            return messages.error(request, "No matches found.")
+        if matches:
+            imgs = Image.objects.filter(id__in=[m["id"] for m in matches])
+            results = sorted(imgs, key=lambda x: [m['similarity'] for m in matches if m['id'] == x.id][0])
+        else:
+            messages.warning(request, "No matches found")
 
     return render(request, "gallery/search.html", {"results": results, "query": query})
 

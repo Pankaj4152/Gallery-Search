@@ -7,12 +7,8 @@ class EmbeddingExtractor:
         self.model = SentenceTransformer(model)
         self.device = device
 
-    def get_embedding(self):
+    def get_embedding(self, text):
         ''' Extract embeddings for image description'''
-        for img in Image.objects.exclude(desctription=None):
-            if not img.embedding:
-                embedding = self.model.encode(img.description, device=self.device)
-                img.embedding = pickle.dumps(embedding)
-                img.save()
+        embedding = self.model.encode(text, normalize_embeddings=True,device=self.device)
 
-                return f"Embedding of image {img.id} generated."
+        return embedding

@@ -16,6 +16,12 @@ class FaissSearchEngine:
         for img in Image.objects.exclude(embedding=None):
             try:
                 vector = pickle.loads(img.embedding)
+                vector = np.array(vector, dtype='float32')
+
+                if vector.shape != (384,):
+                    print(f'WARNING Invalid vector shape for image description {img.id}: {vector.shape}')
+                    continue
+
                 embeddings.append(vector)
                 ids.append(img.id)
             except Exception as e:
@@ -25,10 +31,10 @@ class FaissSearchEngine:
             print(f"INFO No embeddings to index")
             return None
         
-        embeddings = np.array(embeddings).astype('float32')
+        embeddings = np.vstack(embeddings).astype('float32')
         dimension = embeddings.shape[1]
 
-        base_index = faiss.IndexFlatL2(dimension)
+        base_index = faiss.IndexFlatIP(dimension)
         self.index = faiss.IndexIDMap(base_index)
         self.index.add_with_ids(embeddings, np.array(ids, dtype='int64'))
         
@@ -50,7 +56,7 @@ class FaissSearchEngine:
         self.build_index()
         self.save_index()
 
-    def search(self, query_vec, k=5):
+    def search(self, query_vec, k, threshold):
         if self.index is None:
             if not self.load_index():
                 self.build_index()
@@ -59,16 +65,18 @@ class FaissSearchEngine:
             print("ERROR Index unable for searching")
             return []
 
-        query_vec = np.array(query_vec).astype('float32').reshape(1, -1)
+        query_vec = np.array(query_vec, dtype='float32').reshape(1, -1)
         distances, ids = self.index.search(query_vec, k)
 
         results = []
         for rank in range(len(ids[0])):
             image_id = int(ids[0][rank])
-            if image_id != -1:  # Faiss usa -1 para resultados no válidos
+            similarity = float(distances[0][rank])
+
+            if image_id != -1 and similarity >= threshold:
                 results.append({
                     "id": image_id,
-                    "distance": float(distances[0][rank])
+                    "similarity": similarity
                 })
 
         return results
@@ -87,6 +95,7 @@ class FaissIndexController(FaissSearchEngine):
         try:
             v = pickle.loads(img.embedding)
             v = np.array(v).astype('float32').reshape(1, -1)
+            faiss.normalize_L2(v)
             self.index.add_with_ids(v, np.array([img.id], dtype='int64'))
             self.save_index()
             return(f"INFO Image ID {img.id} saved to index")

@@ -17,7 +17,7 @@ def process_image_task(self, image_id):
         indexer = FaissIndexController()
 
         description = describer.img_to_text(img_path)
-        embedding = embedder.get_embedding()
+        embedding = embedder.get_embedding(description)
         indexer.add_img_to_idx(image_obj)
 
         image_obj.description = description

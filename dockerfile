@@ -1,10 +1,8 @@
 FROM python:3.10 AS model-downloader
 RUN pip install --no-cache-dir sentence-transformers
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
+RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2', cache_folder='/tmp/models')"
 
 FROM python:3.10-slim
-
-ENV TRANSFORMERS_CACHE=/root/.cache/torch/sentence_transformers
 
 WORKDIR /app
 
@@ -20,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-COPY --from=model-downloader /root/.cache/torch/sentence_transformers /root/.cache/torch/sentence_transformers
+COPY --from=model-downloader /tmp/models /root/.cache/torch/sentence_transformers
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
