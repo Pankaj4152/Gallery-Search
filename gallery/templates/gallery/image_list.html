@@ -10,20 +10,15 @@
     <div class="progress" style="height: 24px;">
         <div class="progress-bar {% if percent_used > 90 %}bg-danger{% elif percent_used > 70 %}bg-warning{% else %}bg-success{% endif %}"
              role="progressbar"
-             style="width: {{ percent_used }}%;"
+             style="width: '{{ percent_used }}%;'"
              aria-valuenow="{{ percent_used }}" aria-valuemin="0" aria-valuemax="100">
             {{ percent_used }}%
         </div>
     </div>
 </div>
-<!-- End Storage Usage Bar -->
+<!-- End Storage Usage Bar --> 
 
 <a class="btn btn-primary mb-3" href="{% url 'upload' %}">Upload New Image</a>
-{% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-    {% endfor %}
-{% endif %}
 {% if images %}
 <form method="post" action="{% url 'delete_all_images' %}" onsubmit="return confirm('Are you sure you want to delete ALL images?');">
     {% csrf_token %}

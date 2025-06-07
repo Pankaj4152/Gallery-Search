@@ -9,7 +9,7 @@ def user_directory_path(instance, filename):
 
 class Image(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='images')
-    path = models.CharField(max_length=255)
+    path = models.CharField(max_length=255, null=True)
     image_file = models.FileField(upload_to='images/', null=True, blank=True) 
     description = models.TextField(blank=True)
     embedding = models.BinaryField(blank=True) 

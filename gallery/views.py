@@ -3,9 +3,7 @@ from django.contrib import messages
 from django.views.decorators.http import require_POST
 from django.http import HttpResponseRedirect
 from django.urls import reverse
-from codes.img_to_text import GenerateImageDescription, GetTextEmbedding
 from codes.embedding_extraction import EmbeddingExtractor
-from .image_storage import ImageStorage
 from .models import Image
 from .tasks import *
 from django.views.decorators.http import require_POST

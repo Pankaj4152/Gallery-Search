@@ -102,7 +102,7 @@ class FaissIndexController(FaissSearchEngine):
         except Exception as e:
             return(f"ERROR at saving image ID {img.id} to index: {e}")
         
-    def remove_img_from_idx(self, img):
+    def remove_img_from_idx(self, img_id):
         if self.index is None:
             if not self.load_index():
                 self.build_index()
@@ -111,11 +111,11 @@ class FaissIndexController(FaissSearchEngine):
             return("ERROR Was not possible to build or load the index")
         
         try:
-            self.index.remove_ids(np.array([img.id], dtype='int64'))
+            self.index.remove_ids(np.array([img_id], dtype='int64'))
             self.save_index()
-            return(f"INFO Image ID {img.id} deleted from index")
+            return(f"INFO Image ID {img_id} deleted from index")
         except Exception as e:
-            return(f"ERROR at removing image ID {img.id} from index: {e}")
+            return(f"ERROR at removing image ID {img_id} from index: {e}")
 
 
         
