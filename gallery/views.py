@@ -11,8 +11,6 @@ from django.http import HttpResponseRedirect
 from django.urls import reverse
 from codes.faiss_index import FaissSearchEngine, FaissIndexController
 import numpy as np
-import torch
-import clip
 from django.contrib.auth.decorators import login_required
 
 MAX_FILE_SIZE_MB = 5  # Maximum size per image in MB
@@ -56,7 +54,7 @@ def upload_image(request):
             image_obj = Image(image_file=image_file, path=image_file.name, user=request.user)
             image_obj.save()
     
-            process_image_task.delay(image_obj.id)
+            process_image_chain(image_obj.id).delay()
             success_count += 1
 
         if success_count > 0:
