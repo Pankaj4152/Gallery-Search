@@ -13,7 +13,6 @@ class Image(models.Model):
     image_file = models.FileField(upload_to='images/', null=True, blank=True) 
     description = models.TextField(blank=True)
     embedding = models.BinaryField(blank=True) 
-    similarity = models.FloatField(null=True, blank=True)
 
     def set_embedding(self, embedding):
         # Convert the numpy array to binary for storage

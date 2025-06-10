@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
+    "rest_framework"
 ]
 
 # External apps created should be listed here 
@@ -52,6 +54,7 @@ INSTALLED_APPS += EXTERNAL_APPS
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -148,3 +151,8 @@ LOGIN_REDIRECT_URL = '/gallery/image_list/'
 
 # SESSION_ENGINE = "django.contrib.sessions.backends.file"
 # SESSION_FILE_PATH = "/tmp/django_sessions"  # or another temp directory
+
+# cors authorization 
+CORS_ALLOWED_ORIGINS = [
+    
+]
