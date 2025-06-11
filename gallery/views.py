@@ -5,7 +5,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django.contrib.auth.models import User
 from django.core.files.uploadedfile import UploadedFile
 from .models import Image
-from .serializer import ImageSerializer
+from .serializers import ImageSerializer
 from .tasks import *
 from codes.faiss_index import FaissSearchEngine, FaissIndexController
 from codes.embedding_extraction import EmbeddingExtractor 
@@ -21,13 +21,13 @@ class ImageUpload(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def upload_image(self, request, format=None):
-        image_files = request.FILES.getlist('image')  # Get list of uploaded files
+        image_files = request.FILES.getlist('image')  
         if not image_files:
             return Response({"error": 'No files uploaded'}, status=status.HTTP_400_BAD_REQUEST)
 
-        allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']          # Supported MIME types
-        success_count = 0                                                               # Track number of successful uploads
-        total_storage = get_total_storage_used(request.user)                            # Current storage usage
+        allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']         
+        success_count = 0                                                              
+        total_storage = get_total_storage_used(request.user)                           
 
         for f in image_files:
             if f.size > MAX_FILE_SIZE_MB * 1024 * 1024:

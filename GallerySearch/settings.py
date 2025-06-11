@@ -39,7 +39,8 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "corsheaders",
-    "rest_framework"
+    "rest_framework",
+    "rest_framwework.authtoken"
 ]
 
 # External apps created should be listed here 
@@ -61,6 +62,8 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True  # TODO Delete later
 
 ROOT_URLCONF = "GallerySearch.urls"
 

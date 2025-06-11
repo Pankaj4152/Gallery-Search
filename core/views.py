@@ -1,15 +1,18 @@
-from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.contrib.auth.models import User
+from rest_framework.permissions import AllowAny
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
+from .serializers import UserSerializer
 
-def home(request):
-    return render(request, 'home.html')
+class RegisterUser(APIView):
+    permission_classes = [AllowAny]
 
-def signup(request):
-    if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
-    else:
-        form = UserCreationForm()
-    return render(request, 'registration/signup.html', {'form': form})
+    def signup(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            return Response({'message': 'User created'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
