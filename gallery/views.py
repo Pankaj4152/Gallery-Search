@@ -20,35 +20,40 @@ class ImageUpload(APIView):
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [permissions.IsAuthenticated]
 
-    def upload_image(self, request, format=None):
+    def post(self, request, format=None):
         image_files = request.FILES.getlist('image')  
         if not image_files:
             return Response({"error": 'No files uploaded'}, status=status.HTTP_400_BAD_REQUEST)
 
         allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']         
-        success_count = 0                                                              
+        uploaded_images = []                                                              
         total_storage = get_total_storage_used(request.user)                           
 
         for f in image_files:
+            if f.type not in allowed_types:
+                continue
             if f.size > MAX_FILE_SIZE_MB * 1024 * 1024:
                 continue
             if total_storage + f.size > MAX_TOTAL_STORAGE_MB * 1024 * 1024:
                 break
-            if f.type not in allowed_types:
-                continue
 
             image_obj = Image(image_file=f, path=f.name, user=request.user)
             image_obj.save()
             process_image_chain(image_obj.id).delay()
-            success_count += 1
+            uploaded_images.append(image_obj)
+            total_storage += f.size
 
-        serializer = ImageSerializer(success_count, many=True)
+        if not uploaded_images:
+            return Response({"error": "No images were uploaded due to validation limits."}, status=status.HTTP_400_BAD_REQUEST)
+            
+
+        serializer = ImageSerializer(uploaded_images, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED) 
 
 class ImageList(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def list_images(self, request):
+    def get(self, request):
         images = Image.objects.filter(user=request.user)
         serializer = ImageSerializer(images, many=True)
         return Response(serializer.data)
@@ -56,7 +61,7 @@ class ImageList(APIView):
 class ImageSearch(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def search_images(self, request):
+    def get(self, request):
         query = request.GET.get('q', '').strip().lower()
         if not query:
             return Response({'error': 'No query provided'}, status=status.HTTP_400_BAD_REQUEST)
@@ -77,7 +82,7 @@ class ImageSearch(APIView):
 class ImageDelete(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def delete_image(self, request, image_id):
+    def delete(self, request, image_id):
         try:
             image = Image.objects.get(id=image_id, user=request.user)
             image.image_file.delete(save=False)  # Delete the file from storage
@@ -93,6 +98,6 @@ class ImageDelete(APIView):
 class DeleteAllImages(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def delete_all_images(self, request):
+    def delete(self, request):
         Image.objects.filter(user=request.user).delete()
         return Response({'message': 'All gallery deleted'}, status=status.HTTP_204_NO_CONTENT)

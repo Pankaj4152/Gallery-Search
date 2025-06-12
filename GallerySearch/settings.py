@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-iode#d#0=kycge_wo6+ehglc43mybg#sn-t**m_8y7ai+*&mas
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost']
 
 
 # Application definition
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "rest_framework",
-    "rest_framwework.authtoken"
+    "rest_framework.authtoken"
 ]
 
 # External apps created should be listed here 
