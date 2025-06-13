@@ -3,7 +3,7 @@ import { ImageSearch } from './pages/ImageSearch';
 import { ImageUpload } from './pages/ImageUpload';
 import { Gallery } from './pages/Gallery';
 import { HomePage } from './pages/HomePage';
-import { Navbar } from './components/Navbar';
+import { Navbar } from './components/partials/Navbar';
 
 function App() {
   return (
