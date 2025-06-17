@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-iode#d#0=kycge_wo6+ehglc43mybg#sn-t**m_8y7ai+*&mas
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['0.0.0.0', 'localhost']
+ALLOWED_HOSTS = ['0.0.0.0', 'localhost', '127.0.0.1']
 
 
 # Application definition
@@ -159,3 +159,13 @@ LOGIN_REDIRECT_URL = '/gallery/image_list/'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173'
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
