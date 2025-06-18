@@ -17,7 +17,7 @@ class UserSerializer(serializers.ModelSerializer):
             try:
                 validate_email(value)
             except ValidationError:
-                raise serializers.ValidationError('Enter a valid email address')
+                raise serializers.ValidationError('Enter a va lid email address')
             if User.objects.filter(email=value).exists():
                 raise serializers.ValidationError('Email already in use')
         return value

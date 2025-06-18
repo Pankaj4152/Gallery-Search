@@ -176,3 +176,10 @@ cython_debug/
 
 
 media/images/*
+
+.env
+.env.local
+.env.*.local
+.vite
+coverage
+*.tsbuildinfo

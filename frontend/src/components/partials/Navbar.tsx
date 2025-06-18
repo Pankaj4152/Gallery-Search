@@ -19,23 +19,24 @@ export function Navbar() {
                 <li>
                     <Link to="/search">Search</Link>
                 </li>
-                {/* User authentication pending
-                <li className="nav-item d-flex align-items-center">
-                    {% if user.is_authenticated %}
-                        <span className="me-2">Welcome, <strong>{{ user.username }}</strong></span>
-                        <form method="post" action="{% url 'logout' %}" style="display:inline;">
-                            {% csrf_token %}
-                            <button type="submit" className="btn btn-outline-danger btn-sm ms-2">Logout</button>
-                        </form>
-                    {% else %}
-                        <a href="{% url 'login' %}" className="btn btn-outline-primary btn-sm me-2">Login</a>
-                        <a href="{% url 'signup' %}" className="btn btn-primary btn-sm">Sign Up</a>
-                    {% endif %}
+                <li>
+                    <Link to="/signup">Sign Up</Link>
                 </li>
-                */} 
+                <li>
+                    <Link to="/login">Login</Link>
+                </li>
+                <li>
+                    <button onClick={logout}>Logout</button>
+                </li>
             </ul>
         </div>
     </div>
 </nav>
 )
+}
+
+function logout() {
+  localStorage.removeItem("access");
+  localStorage.removeItem("refresh");
+  window.location.href = "/login";
 }
