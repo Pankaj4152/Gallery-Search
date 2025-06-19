@@ -26,11 +26,12 @@ class ImageUpload(APIView):
             return Response({"error": 'No files uploaded'}, status=status.HTTP_400_BAD_REQUEST)
 
         allowed_types = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']         
-        uploaded_images = []                                                              
+        uploaded_images = []  
+        task_responses = []                                                            
         total_storage = get_total_storage_used(request.user)                           
 
         for f in image_files:
-            if f.type not in allowed_types:
+            if f.content_type not in allowed_types:
                 continue
             if f.size > MAX_FILE_SIZE_MB * 1024 * 1024:
                 continue
@@ -39,16 +40,23 @@ class ImageUpload(APIView):
 
             image_obj = Image(image_file=f, path=f.name, user=request.user)
             image_obj.save()
-            process_image_chain(image_obj.id).delay()
+            result = process_image_chain(image_obj.id).delay()
             uploaded_images.append(image_obj)
             total_storage += f.size
+
+            task_responses.append({
+                "image_id": image_obj.id,
+                "task_id": result.id
+            })
 
         if not uploaded_images:
             return Response({"error": "No images were uploaded due to validation limits."}, status=status.HTTP_400_BAD_REQUEST)
             
-
-        serializer = ImageSerializer(uploaded_images, many=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED) 
+        return Response({
+                    "message": "Images uploaded successfully",
+                    "tasks": task_responses,
+                    "images": ImageSerializer(uploaded_images, many=True).data
+                }, status=status.HTTP_202_ACCEPTED)
 
 class ImageList(APIView):
     permission_classes = [permissions.IsAuthenticated]

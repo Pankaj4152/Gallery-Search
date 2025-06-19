@@ -63,8 +63,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-CORS_ALLOW_ALL_ORIGINS = True  # TODO Delete later
-
 ROOT_URLCONF = "GallerySearch.urls"
 
 TEMPLATES = [
@@ -159,7 +157,7 @@ LOGIN_REDIRECT_URL = '/gallery/image_list/'
 CORS_ALLOWED_ORIGINS = [
     'http://localhost:5173'
 ]
-
+CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [

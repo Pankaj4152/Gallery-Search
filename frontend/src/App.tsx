@@ -1,6 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ImageSearch } from './pages/ImageSearch';
-import { ImageUpload } from './pages/ImageUpload';
+import { ImageUploadPage } from './pages/ImageUploadPage';
 import { Gallery } from './pages/Gallery';
 import { HomePage } from './pages/HomePage';
 import { Navbar } from './components/partials/Navbar';
@@ -15,7 +15,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/search" element={<ImageSearch />} />
-        <Route path="/upload" element={<ImageUpload />} />
+        <Route path="/upload" element={<ImageUploadPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/gallery" element={<RequireAuth><Gallery /></RequireAuth>} />
