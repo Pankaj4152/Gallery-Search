@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { uploadImages } from '../../api/images.api';
+import toast from "react-hot-toast";
 
 export function UploadImage({ onUploadSuccess }: { onUploadSuccess?: () => void}) {
     const [file, setFile] = useState<File | null>(null);
-    //const [description, setDescription] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -11,14 +11,25 @@ export function UploadImage({ onUploadSuccess }: { onUploadSuccess?: () => void}
 
         const formData = new FormData();
         formData.append("image", file);
-        //formData.append("description", description);
 
         try {
             await uploadImages(formData);
             setFile(null);
             //setDescription("");
             if (onUploadSuccess) onUploadSuccess();
+            toast.success('Image uploaded succesfully', {
+                style: {
+                    background: "#022c1e",
+                    color: "white"
+                }
+            });
         } catch (err) {
+            toast.error("Login failed: " + err, {
+                style: {
+                background: "#450a0a",
+                color: "white",
+                }
+            });
             console.error("Upload failed", err);
         }     
     };
@@ -30,15 +41,6 @@ export function UploadImage({ onUploadSuccess }: { onUploadSuccess?: () => void}
                 accept="image/*"
                 onChange={(e) => setFile(e.target.files?.[0] || null)}
             />
-            {/*
-            <input
-                type="text"
-                name="optionalField"
-                placeholder="Description (Optional)"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-            />
-            */}
             <button type="submit">Upload</button>
         </form>
     );

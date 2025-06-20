@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export function Signup() {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -9,9 +10,20 @@ export function Signup() {
   const onSubmit = async (data: any) => {
     try {
       await axios.post("http://localhost:8000/signup/", data);
-      alert("Signup successful! Please log in.");
+      toast.success('Signup succesful! Please login.', {
+        style: {
+            background: "#022c1e",
+            color: "white"
+        }
+      });
       navigate("/login");
     } catch (err: any) {
+      toast.error("Signup failed: " + JSON.stringify(err.response?.data), {
+        style: {
+          background: "#450a0a",
+          color: "white",
+        }
+      });
       alert("Signup failed: " + JSON.stringify(err.response?.data));
     }
   };

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { getImages } from '../../api/images.api'
+import { deleteImage, getImages } from '../../api/images.api'
+import toast from "react-hot-toast";
 interface Image {
   id: number;
   image_file: string;
@@ -15,11 +16,32 @@ export function ImageList() {
         const res = await getImages();
         setImages(res.data);
       } catch (error) {
+            toast.error("Login failed:" + error, {
+                style: {
+                    background: "#450a0a",
+                    color: "white",
+                },
+            });
         console.error("Error loading images", error);
       }
     }
     loadGallery();
   }, []);
+
+  const handleDelete = async (id: number) => {
+    try {
+        await deleteImage(id);
+        setImages(images.filter((img) => img.id !== id));
+    } catch (error) {
+            toast.error("Login deleting image:" + error, {
+        style: {
+            background: "#450a0a",
+            color: "white",
+        },
+        });
+        console.error("Error deleting image", error);
+    }
+  };
 
   return (
     <div>
@@ -34,6 +56,7 @@ export function ImageList() {
               style={{ maxWidth: "300px" }}
             />
             {image.description && <p>{image.description}</p>}
+            <button onClick={() => handleDelete(image.id)}>Delete</button>
           </div>
         ))
       )}

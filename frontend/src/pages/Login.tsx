@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export function Login() {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -11,10 +12,20 @@ export function Login() {
       const res = await axios.post("http://localhost:8000/api/token/", data);
       localStorage.setItem("access", res.data.access);
       localStorage.setItem("refresh", res.data.refresh);
-      alert("Login successful!");
+      toast.success('Login was succesfull. Welcome to your gallery!', {
+                style: {
+                    background: "#022c1e",
+                    color: "white"
+                }
+            });
       navigate("/gallery");
     } catch (err: any) {
-      alert("Login failed: " + JSON.stringify(err.response?.data));
+      toast.error("Login failed: " + JSON.stringify(err.response?.data), {
+        style: {
+          background: "#450a0a",
+          color: "white",
+        }
+      });
     }
   };
 
