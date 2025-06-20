@@ -12,16 +12,21 @@ import { Toaster } from 'react-hot-toast';
 function App() {
   return (
     <BrowserRouter>
-      <Navbar />
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/search" element={<ImageSearchPage />} />
-        <Route path="/upload" element={<ImageUploadPage />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/gallery" element={<RequireAuth><Gallery /></RequireAuth>} />
-      </Routes>
-      <Toaster/>
+      <div className='min-h-screen flex flex-col'>
+        <Navbar/>  
+        <main className='flex-grow'>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/search" element={<ImageSearchPage />} />
+            <Route path="/upload" element={<ImageUploadPage />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/gallery" element={<RequireAuth><Gallery /></RequireAuth>} />
+          </Routes>
+        </main>
+
+        <Toaster/>
+      </div>  
     </BrowserRouter>
   );
 }

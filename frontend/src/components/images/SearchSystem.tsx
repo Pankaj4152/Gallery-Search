@@ -1,6 +1,6 @@
 import toast from "react-hot-toast";
 import { searchImages } from "../../api/images.api";
-import React, { useState } from "react";
+import { useState } from "react";
 
 interface Image {
     id: number;
