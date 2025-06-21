@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import GalleryButton from "../components/partials/GalleryButton";
 
 export function HomePage() {
   return (
@@ -6,17 +7,14 @@ export function HomePage() {
       <section className="py-40 px-4 text-center bg-gradient-to-r from-neutral-800 to-zinc-950 text-white rounded-lg">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">Discover & Organize Your Images</h1>
-          <p className="text-xl md:text-2xl mb-8">GalleryAI helps you search, upload and manage your visual collection with ease</p>
+          <p className="text-xl md:text-2xl mb-8">Search anything find something. Upload and manage your visual collection with ease</p>
           
           <div className="flex flex-col sm:flex-row justify-center gap-4">
-            <Link to="/gallery" className="bg-white text-indigo-600 px-6 py-3 rounded-lg font-medium shadow-lg transition-colors hover:bg-gray-100">
-              View Your Gallery
+            <Link to="/gallery">
+              <GalleryButton text="My Gallery"/>
             </Link>
-            <Link 
-              to="/upload" 
-              className="bg-indigo-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-indigo-800 transition-colors shadow-lg"
-            >
-              Upload Images
+            <Link to="/upload" >
+              <GalleryButton text="Upload Image" />
             </Link>
           </div>
         </div>
@@ -25,10 +23,10 @@ export function HomePage() {
       <section className="py-16 px-4 max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">Key Features</h2>
         
+        {/* Feature 1 */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Feature 1 */}
           <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-            <div className="text-indigo-600 mb-4">
+            <div className="text-cyan-700 mb-4">
               <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -41,7 +39,7 @@ export function HomePage() {
 
           {/* Feature 2 */}
           <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-            <div className="text-indigo-600 mb-4">
+            <div className="text-cyan-700 mb-4">
               <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
@@ -54,7 +52,7 @@ export function HomePage() {
 
           {/* Feature 3 */}
           <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-            <div className="text-indigo-600 mb-4">
+            <div className="text-cyan-700 mb-4">
               <svg className="w-10 h-10 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
               </svg>
