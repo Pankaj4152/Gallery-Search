@@ -1,0 +1,103 @@
+services:
+  # Django Backend
+  - type: web
+    name: gallery-search-backend
+    env: python
+    plan: starter
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py collectstatic --noinput
+    startCommand: |
+      python manage.py migrate
+      gunicorn GallerySearch.wsgi:application --bind 0.0.0.0:$PORT --workers 2
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: GallerySearch.settings_prod
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: redis
+          type: redis
+          property: connectionString
+      - key: DB_NAME
+        fromService:
+          name: postgres
+          type: pserv
+          property: database
+      - key: DB_USER
+        fromService:
+          name: postgres
+          type: pserv
+          property: user
+      - key: DB_PASSWORD
+        fromService:
+          name: postgres
+          type: pserv
+          property: password
+      - key: DB_HOST
+        fromService:
+          name: postgres
+          type: pserv
+          property: host
+      - key: DB_PORT
+        fromService:
+          name: postgres
+          type: pserv
+          property: port
+
+  # Celery Worker
+  - type: worker
+    name: gallery-search-worker
+    env: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A GallerySearch worker --loglevel=info
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: GallerySearch.settings_prod
+      - key: SECRET_KEY
+        generateValue: true
+      - key: CELERY_BROKER_URL
+        fromService:
+          name: redis
+          type: redis
+          property: connectionString
+      - key: DB_NAME
+        fromService:
+          name: postgres
+          type: pserv
+          property: database
+      - key: DB_USER
+        fromService:
+          name: postgres
+          type: pserv
+          property: user
+      - key: DB_PASSWORD
+        fromService:
+          name: postgres
+          type: pserv
+          property: password
+      - key: DB_HOST
+        fromService:
+          name: postgres
+          type: pserv
+          property: host
+      - key: DB_PORT
+        fromService:
+          name: postgres
+          type: pserv
+          property: port
+
+  # Redis Database
+  - type: redis
+    name: redis
+    plan: starter
+
+  # PostgreSQL Database
+  - type: pserv
+    name: postgres
+    env: postgresql
+    plan: starter 
