@@ -21,6 +21,7 @@ decorator==5.2.1
 defusedxml==0.7.1
 Django==4.2.21
 django-cors-headers==4.7.0
+django-redis==5.4.0
 djangorestframework==3.16.0
 docopt==0.6.2
 executing==2.2.0
@@ -67,6 +68,7 @@ prompt_toolkit==3.0.51
 ptyprocess==0.7.0
 pure_eval==0.2.3
 Pygments==2.19.1
+psycopg2-binary==2.9.9
 python-dateutil==2.9.0.post0
 PyYAML==6.0.2
 pyzmq==26.4.0

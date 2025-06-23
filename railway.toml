@@ -19,4 +19,4 @@ startCommand = "celery -A GallerySearch worker --loglevel=info"
 [[services]]
 name = "redis"
 type = "redis"
-plan = "starter" 
+plan = "starter"    

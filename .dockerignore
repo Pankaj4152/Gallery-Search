@@ -1,0 +1,76 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env
+pip-log.txt
+pip-delete-this-directory.txt
+.tox
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.log
+.git
+.mypy_cache
+.pytest_cache
+.hypothesis
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node.js (frontend)
+frontend/node_modules/
+frontend/dist/
+frontend/.npm
+frontend/.cache
+
+# Media and static files (will be served by CDN in production)
+media/
+staticfiles/
+
+# Database
+*.sqlite3
+*.db
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Test files
+tests/
+test_*
+*_test.py
+
+# Development files
+docker-compose.yml
+docker-compose.override.yml 

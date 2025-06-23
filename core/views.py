@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from rest_framework.permissions import AllowAny
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 from .serializers import UserSerializer
 
 class RegisterUser(APIView):
@@ -16,3 +17,11 @@ class RegisterUser(APIView):
             user = serializer.save()
             return Response({'message': 'User created'}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def health_check(request):
+    """Health check endpoint for Railway/Render deployment"""
+    return JsonResponse({
+        'status': 'healthy',
+        'message': 'Gallery Search API is running',
+        'version': '1.0.0'
+    })
