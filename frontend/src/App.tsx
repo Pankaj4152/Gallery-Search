@@ -8,6 +8,7 @@ import { Signup } from './pages/Signup';
 import { Login } from './pages/Login';
 import { RequireAuth } from './components/RequireAuth';
 import { Toaster } from 'react-hot-toast';
+import { AuthProvider } from './components/context/AuthContext';
 
 function App() {
   return (
@@ -15,14 +16,16 @@ function App() {
       <div className='min-h-screen flex flex-col'>
         <Navbar/>  
         <main className='flex-grow'>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/search" element={<ImageSearchPage />} />
-            <Route path="/upload" element={<ImageUploadPage />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/gallery" element={<RequireAuth><Gallery /></RequireAuth>} />
-          </Routes>
+          <AuthProvider>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/search" element={<ImageSearchPage />} />
+              <Route path="/upload" element={<ImageUploadPage />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/gallery" element={<RequireAuth><Gallery /></RequireAuth>} />
+            </Routes>
+          </AuthProvider>
         </main>
 
         <Toaster/>

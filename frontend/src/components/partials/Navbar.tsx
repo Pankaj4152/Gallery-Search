@@ -1,15 +1,33 @@
 import { Link } from 'react-router-dom';
 import logo from '../../assets/logo.png';
+import { useState, useEffect } from 'react';
 
 export function Navbar() {
+    const [showNavbar, setShowNavbar] = useState(false);
+
+    useEffect(() =>{
+        const handleScroll = () => {
+            if (window.scrollY > 30) {
+                setShowNavbar(true);
+            } else {
+                setShowNavbar(false);
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
     return (
-    <nav className='fixed w-full top-2 z-50'>
+    <nav className={`fixed top-0 left-0 w-full z-50 transition-transform duration-500 ease-in-out ${
+        showNavbar ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+      } py-3 flex items-center justify-between`}>
       <div className='bg-zinc-900/60 shadow-sm rounded-2xl w-full max-w-[1800px] mx-auto'>
         <div className='flex items-center justify-between h-16 px-4'>
                 
                 <div className='flex-shrink-0 flex items-center'>
                     <Link to="/" className='flex items-center gap-2'>
-                        <img src={logo} alt="GalleryAI Logo" className="h-8 w-auto" />
+                        <img src={logo} alt="GalleryAI Logo" className="h-16 w-auto" />
                     </Link>
                 </div>
              
