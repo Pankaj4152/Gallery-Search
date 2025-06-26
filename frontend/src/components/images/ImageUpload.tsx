@@ -35,13 +35,23 @@ export function UploadImage({ onUploadSuccess }: { onUploadSuccess?: () => void}
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <input
-                type='file'
-                accept="image/*"
-                onChange={(e) => setFile(e.target.files?.[0] || null)}
-            />
-            <button type="submit">Upload</button>
-        </form>
+        <div className="py-40 px-4 text-center bg-gradient-to-r from-neutral-800 to-zinc-950 text-white rounded-lg">
+            <form onSubmit={handleSubmit} className="justify-center text-center">
+                {file && (
+                <img
+                    src={URL.createObjectURL(file)}
+                    alt="Preview"
+                    className="mx-auto mt-6 rounded-lg shadow-lg max-w-sm"
+                />
+                )}
+                <input
+                    type='file'
+                    accept="image/*"
+                    onChange={(e) => setFile(e.target.files?.[0] || null)}
+                    className="mt-6 px-6 py-2 bg-white text-black rounded-md font-medium hover:bg-gray-200 transition"
+                />
+                <button type="submit" className="mt-6 px-6 py-2 bg-white text-black rounded-md font-medium hover:bg-gray-200 transition">Upload</button>
+            </form>
+        </div>
     );
 }

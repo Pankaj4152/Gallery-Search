@@ -1,96 +1,31 @@
-import toast from "react-hot-toast";
-import { searchImages } from "../../api/images.api";
-import { useState } from "react";
-
 interface Image {
-    id: number;
-    image_file: string;
-    description: string;
+  id: number;
+  image_file: string;
+  description: string;
 }
 
-export function ImageSearch() {
-    const [query, setQuery] = useState("");
-    const [results, setResults] = useState<Image[]>([]);
-    const [loading, setLoading] = useState(false);
+export function ImageResults({ results }: { results: Image[] }) {
+  if (!results.length) return null;
 
-    const handleSearch = async () => {
-        if (!query.trim()) {
-            toast('Please enter a search query', {
-                icon: '⚠️',
-                style: {
-                    background: '#713200',
-                }
-            });
-            return;
-        }
-
-        try {
-            setLoading(true);
-            const response = await searchImages(query);
-            setResults(response.data);
-            if (response.data.length == 0) {
-                toast('No results found', {
-                    icon: '🏳️',
-                });
-            } else {
-                toast.success('Results loaded successfully!', {
-                style: {
-                    background: "#022c1e",
-                    color: "white"
-                    }
-                });
-            };
-        } catch (error) {
-            toast.error("Search failed:" + error, {
-                style: {
-                    background: "#450a0a",
-                    color: "white",
-                },
-            });
-            console.error("Search failed" , error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="container mt-4">
-            <h2 className="mb-3">Search Images</h2>
-
-            <div className="input-group mb-4">
-                <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter a description..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                />
-                <button
-                    className="btn btn-primary"
-                    onClick={handleSearch}
-                    disabled={loading}
-                >
-                    {loading ? "Searching..." : "Search"}
-                </button>
+  return (
+    <div className="px-4 py-16 max-w-7xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {results.map((image) => (
+          <div key={image.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+            <img
+              src={`http://localhost:8000${image.image_file}`}
+              alt="Search Result"
+              className="w-full h-60 object-cover"
+            />
+            <div className="p-4">
+              <p className="text-sm text-gray-700">
+                {image.description || "No description"}
+              </p>
             </div>
-
-            <div className="row">
-                {results.map((image) => (
-                    <div key={image.id} className="col-md-4 mb-4">
-                        <div className="card h-10 shadow-sm">
-                            <img
-                                src={`http://localhost:8000${image.image_file}`}
-                                className="card-img-top"
-                                alt="Search Result"
-                                style={{ maxWidth: "300px" }}
-                            />
-                            <div className="card-body">
-                                <p className="card-text">{image.description || "No description"}</p>
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
+

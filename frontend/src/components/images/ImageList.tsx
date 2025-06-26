@@ -50,15 +50,15 @@ export function ImageList() {
         <p>No uploaded images</p>
         ) : (
         images.map((image) => (
-            <div key={image.id}>
+            <div key={image.id} className="bg-white rounded-lg shadow-md overflow-hidden">
             <img
                 onClick={() => setSelectedImage(image)}
                 src={`http://localhost:8000${image.image_file}`}
                 alt={"Image"}
                 className="w-60 h-60 object-cover rounded-lg cursor-pointer hover:scale-105 transition"
             />
-            {image.description && <p>{image.description}</p>}
-            <button onClick={() => handleDelete(image.id)}>Delete</button>
+            {image.description && <p className="p-3">{image.description}</p>}
+            <button onClick={() => handleDelete(image.id)} className="px-3 py-2 rounded-md text-lg font-medium text-gray-700 hover:text-sky-900 hover:bg-gray-50 transition-colors">Delete</button>
             </div>
             ))
         )}
