@@ -7,13 +7,7 @@ export const getImages = async () => {
 export const uploadImages = async (formData: FormData) => {
     const response = await axiosInstance.post(
         '/gallery/upload/',
-        formData,
-        {
-            headers: {
-                "Content-Type": "multipart/form-data",
-                Authorization: `Bearer ${localStorage.getItem("access")}`
-            },
-        }
+        formData
     );
     return response.data;
 };
