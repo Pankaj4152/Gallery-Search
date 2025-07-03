@@ -26,7 +26,7 @@ export function Gallery() {
   const { images: previewImages, loading } = useImages(3);
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-stone-900">
       <div ref={containerRef} className="relative bg-gradient-to-r from-neutral-800 to-zinc-950 text-white">
         <ParticlesAnimation />
         <div ref={pinSectionRef} className="h-screen flex flex-col items-center justify-center gap-4 relative z-10">
@@ -57,7 +57,7 @@ export function Gallery() {
         </div>
       </div>
 
-      <div id='gallery-list' className="container mx-auto px-4 py-12 relative z-10">
+      <div id='gallery-list' className="text-neutral-950 container mx-auto px-4 py-12 relative z-10">
         <ImageList />
       </div>
     </div>

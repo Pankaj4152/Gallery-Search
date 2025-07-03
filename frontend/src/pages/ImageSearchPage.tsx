@@ -33,7 +33,7 @@ export function ImageSearchPage() {
   };
 
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-900">
       {/* Hero + Search */}
       <div className="relative h-[110vh]">
         <ParticlesAnimation />

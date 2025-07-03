@@ -30,21 +30,21 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-lg">
+    <div className="min-h-screen py-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto rounded-xl shadow-md overflow-hidden md:max-w-lg">
           <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
-            <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+            <div className="bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
               <div className='p-8'>
                 <div className="text-center mb-8">
-                  <h1 className="text-3xl font-bold text-gray-900">Nice to see you again!</h1>
+                  <h1 className="text-white text-3xl font-bold text-gray-900">Nice to see you again!</h1>
                   <p className="mt-2 text-sm text-gray-600">Sign in to your gallery</p>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Username</label>
+                    <label className="block text-sm font-medium text-gray-400">Username</label>
                     <input {...register("username", { required: true })}
-                      className={`mt-1 block w-full px-3 py-2 border ${errors.username ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none    focus:ring-indigo-500 focus:border-cyan-700`}
+                      className={`text-white mt-1 block w-full px-3 py-2 border ${errors.username ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none    focus:ring-indigo-500 focus:border-cyan-700`}
                         aria-invalid={errors.username ? "true" : "false"}/>
                         {errors.username && (
                           <p className="mt-2 text-sm text-red-600" role="alert">
@@ -53,9 +53,9 @@ export function Login() {
                       )}
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700">Password</label>
+                    <label className="block text-sm font-medium text-gray-400">Password</label>
                     <input {...register("password", { required: true })} type="password" 
-                      className={`mt-1 block w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-cyan-700`}
+                      className={`text-white mt-1 block w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-cyan-700`}
                       aria-invalid={errors.password ? "true" : "false"}/>
                         {errors.password && (
                           <p className="mt-2 text-sm text-red-600" role="alert">
